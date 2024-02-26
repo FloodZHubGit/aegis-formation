@@ -27,6 +27,10 @@ export const GameEngineProvider = ({ children }) => {
     "lastPlayedCard",
     null
   );
+  const [selectNewColor, setSelectNewColor] = useMultiplayerState(
+    "selectNewColor",
+    false
+  );
 
   const players = usePlayersList(true);
   players.sort((a, b) => a.id.localeCompare(b.id));
@@ -40,6 +44,7 @@ export const GameEngineProvider = ({ children }) => {
     lastPlayedCard,
     winner,
     winnerIndex,
+    selectNewColor,
   };
 
   const playCard = (playerIndex, cardIndex) => {
@@ -82,31 +87,59 @@ export const GameEngineProvider = ({ children }) => {
         setTurnOrder(-turnOrder, true);
       }
 
-      if (
-        card.value === "skip" ||
-        card.value === "picker" ||
-        card.value === "reverse"
-      ) {
-        if (turnOrder > 0) {
-          setPlayerTurn((playerTurn + 2) % players.length, true);
-        }
-        if (turnOrder < 0) {
-          setPlayerTurn(
-            (playerTurn + players.length - 2) % players.length,
-            true
-          );
+      if (card.value === "color_changer" || card.value === "pick_four") {
+        setSelectNewColor(true, true);
+        if (card.value === "pick_four") {
+          const nextPlayer = players[(playerTurn + turnOrder) % players.length];
+          const cards = nextPlayer.getState("cards") || [];
+          for (let i = 0; i < 4; i++) {
+            if (deck.length > 0) {
+              const randomIndex = Math.floor(Math.random() * deck.length);
+              const randomCard = deck.splice(randomIndex, 1)[0];
+              cards.push(randomCard);
+            }
+          }
+          nextPlayer.setState("cards", cards, true);
+          setDeck(deck, true);
+          setPlayerTurn((playerTurn + 2 * turnOrder) % players.length, true);
         }
       } else {
-        if (turnOrder > 0) {
-          setPlayerTurn((playerTurn + 1) % players.length, true);
-        }
-        if (turnOrder < 0) {
-          setPlayerTurn(
-            (playerTurn + players.length - 1) % players.length,
-            true
-          );
+        if (card.value === "skip" || card.value === "picker") {
+          if (turnOrder > 0) {
+            setPlayerTurn((playerTurn + 2) % players.length, true);
+          }
+          if (turnOrder < 0) {
+            setPlayerTurn(
+              (playerTurn + players.length - 2) % players.length,
+              true
+            );
+          }
+        } else {
+          if (turnOrder > 0) {
+            setPlayerTurn((playerTurn + 1) % players.length, true);
+          }
+          if (turnOrder < 0) {
+            setPlayerTurn(
+              (playerTurn + players.length - 1) % players.length,
+              true
+            );
+          }
         }
       }
+    }
+  };
+
+  const selectColor = (color) => {
+    setSelectNewColor(false, true);
+    const lastCard = getState("lastPlayedCard");
+    lastCard.type = color;
+    lastCard.value = "color_changer";
+    setLastPlayedCard(lastCard, true);
+    if (turnOrder > 0) {
+      setPlayerTurn((playerTurn + 1) % players.length, true);
+    }
+    if (turnOrder < 0) {
+      setPlayerTurn((playerTurn + players.length - 1) % players.length, true);
     }
   };
 
@@ -222,12 +255,12 @@ export const GameEngineProvider = ({ children }) => {
             .map(() => ({ type: "yellow", value: "skip" })),
           ...new Array(2).fill(0).map(() => ({ type: "green", value: "skip" })),
           // wilds
-          //   ...new Array(4)
-          //     .fill(0)
-          //     .map(() => ({ type: "wild", value: "pick_four" })),
-          //   ...new Array(4)
-          //     .fill(0)
-          //     .map(() => ({ type: "wild", value: "color_changer" })),
+          ...new Array(4)
+            .fill(0)
+            .map(() => ({ type: "wild", value: "pick_four" })),
+          ...new Array(4)
+            .fill(0)
+            .map(() => ({ type: "wild", value: "color_changer" })),
         ],
         true
       );
@@ -246,7 +279,9 @@ export const GameEngineProvider = ({ children }) => {
   }, []);
 
   return (
-    <GameEngineContext.Provider value={{ ...gameState, drawCard, playCard }}>
+    <GameEngineContext.Provider
+      value={{ ...gameState, drawCard, playCard, selectColor }}
+    >
       {children}
     </GameEngineContext.Provider>
   );
