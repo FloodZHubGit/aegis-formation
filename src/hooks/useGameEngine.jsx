@@ -13,6 +13,10 @@ const GameEngineContext = React.createContext();
 const CARDS_PER_PLAYER = 1;
 
 export const GameEngineProvider = ({ children }) => {
+  const [winnerIndex, setWinnerIndex] = useMultiplayerState(
+    "winnerIndex",
+    null
+  );
   const [winner, setWinner] = useMultiplayerState("winner", false);
   const [turnOrder, setTurnOrder] = useMultiplayerState("turnOrder", 1);
   const [timer, setTimer] = useMultiplayerState("timer", 0);
@@ -35,6 +39,7 @@ export const GameEngineProvider = ({ children }) => {
     deck,
     lastPlayedCard,
     winner,
+    winnerIndex,
   };
 
   const playCard = (playerIndex, cardIndex) => {
@@ -55,7 +60,8 @@ export const GameEngineProvider = ({ children }) => {
 
       if (cards.length === 0) {
         player.setState("winner", true, true);
-        setWinner(playerIndex, true);
+        setWinnerIndex(playerIndex, true);
+        setWinner(true, true);
       }
 
       if (card.value === "picker") {

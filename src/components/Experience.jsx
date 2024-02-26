@@ -27,13 +27,13 @@ export const Experience = () => {
         <meshStandardMaterial color="hotpink" />
       </mesh>
 
-      <Center>
-        <group rotation={[0, Math.PI, 0]}>
+      <group rotation={[0, Math.PI, 0]}>
+        <Center>
           {cards.map((card, index) => (
             <Card
               key={index}
               type={`${card.type}_${card.value}`}
-              position={[index * 2, 0, 0]}
+              position={[(index - cards.length / 2) * 2, 0, 0]}
               onClick={(event) => {
                 event.stopPropagation();
                 if (playerTurn === myIndex) {
@@ -42,8 +42,8 @@ export const Experience = () => {
               }}
             />
           ))}
-        </group>
-      </Center>
+        </Center>
+      </group>
 
       {lastPlayedCard && (
         <Card
