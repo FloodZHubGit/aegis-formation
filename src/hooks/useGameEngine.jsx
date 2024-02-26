@@ -10,7 +10,7 @@ import { randInt } from "three/src/math/MathUtils";
 
 const GameEngineContext = React.createContext();
 
-const CARDS_PER_PLAYER = 1;
+const CARDS_PER_PLAYER = 7;
 
 export const GameEngineProvider = ({ children }) => {
   const [winnerIndex, setWinnerIndex] = useMultiplayerState(
