@@ -15,8 +15,11 @@ export const Experience = () => {
       <OrbitControls />
 
       <mesh
-        onClick={() => {
-          drawCard(myIndex);
+        onClick={(event) => {
+          event.stopPropagation();
+          if (playerTurn === myIndex) {
+            drawCard(myIndex);
+          }
         }}
         position={[0, -3, 0]}
       >
@@ -31,7 +34,8 @@ export const Experience = () => {
               key={index}
               type={`${card.type}_${card.value}`}
               position={[index * 2, 0, 0]}
-              onClick={() => {
+              onClick={(event) => {
+                event.stopPropagation();
                 if (playerTurn === myIndex) {
                   playCard(myIndex, index);
                 }

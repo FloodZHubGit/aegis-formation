@@ -10,9 +10,11 @@ import { randInt } from "three/src/math/MathUtils";
 
 const GameEngineContext = React.createContext();
 
-const CARDS_PER_PLAYER = 7;
+const CARDS_PER_PLAYER = 1;
 
 export const GameEngineProvider = ({ children }) => {
+  const [winner, setWinner] = useMultiplayerState("winner", false);
+  const [turnOrder, setTurnOrder] = useMultiplayerState("turnOrder", 1);
   const [timer, setTimer] = useMultiplayerState("timer", 0);
   const [playerTurn, setPlayerTurn] = useMultiplayerState("playerTurn", 0);
   const [playerStart, setPlayerStart] = useMultiplayerState("playerStart", 0);
@@ -32,20 +34,73 @@ export const GameEngineProvider = ({ children }) => {
     playerStart,
     deck,
     lastPlayedCard,
+    winner,
   };
 
   const playCard = (playerIndex, cardIndex) => {
+    if (playerIndex !== playerTurn) {
+      return;
+    }
     const player = players[playerIndex];
     const cards = player.getState("cards") || [];
     const card = cards[cardIndex];
     if (
+      card.type === "wild" ||
       card.type === lastPlayedCard.type ||
       card.value === lastPlayedCard.value
     ) {
       setLastPlayedCard(card, true);
       cards.splice(cardIndex, 1);
       player.setState("cards", cards, true);
-      setPlayerTurn((playerTurn + 1) % players.length, true);
+
+      if (cards.length === 0) {
+        player.setState("winner", true, true);
+        setWinner(playerIndex, true);
+      }
+
+      if (card.value === "picker") {
+        const nextPlayer = players[(playerTurn + 1) % players.length];
+        const cards = nextPlayer.getState("cards") || [];
+        for (let i = 0; i < 2; i++) {
+          if (deck.length > 0) {
+            const randomIndex = Math.floor(Math.random() * deck.length);
+            const randomCard = deck.splice(randomIndex, 1)[0];
+            cards.push(randomCard);
+          }
+        }
+        nextPlayer.setState("cards", cards, true);
+        setDeck(deck, true);
+      }
+
+      if (card.value === "reverse") {
+        setTurnOrder(-turnOrder, true);
+      }
+
+      if (
+        card.value === "skip" ||
+        card.value === "picker" ||
+        card.value === "reverse"
+      ) {
+        if (turnOrder > 0) {
+          setPlayerTurn((playerTurn + 2) % players.length, true);
+        }
+        if (turnOrder < 0) {
+          setPlayerTurn(
+            (playerTurn + players.length - 2) % players.length,
+            true
+          );
+        }
+      } else {
+        if (turnOrder > 0) {
+          setPlayerTurn((playerTurn + 1) % players.length, true);
+        }
+        if (turnOrder < 0) {
+          setPlayerTurn(
+            (playerTurn + players.length - 1) % players.length,
+            true
+          );
+        }
+      }
     }
   };
 
@@ -161,12 +216,12 @@ export const GameEngineProvider = ({ children }) => {
             .map(() => ({ type: "yellow", value: "skip" })),
           ...new Array(2).fill(0).map(() => ({ type: "green", value: "skip" })),
           // wilds
-          ...new Array(4)
-            .fill(0)
-            .map(() => ({ type: "wild", value: "pick_four" })),
-          ...new Array(4)
-            .fill(0)
-            .map(() => ({ type: "wild", value: "color_changer" })),
+          //   ...new Array(4)
+          //     .fill(0)
+          //     .map(() => ({ type: "wild", value: "pick_four" })),
+          //   ...new Array(4)
+          //     .fill(0)
+          //     .map(() => ({ type: "wild", value: "color_changer" })),
         ],
         true
       );

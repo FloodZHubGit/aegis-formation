@@ -2,7 +2,7 @@ import { myPlayer } from "playroomkit";
 import { useGameEngine } from "../hooks/useGameEngine";
 
 export const UI = () => {
-  const { playerTurn, players } = useGameEngine();
+  const { playerTurn, players, winner } = useGameEngine();
   const currentPlayer = players[playerTurn];
   const me = myPlayer();
 
@@ -14,6 +14,11 @@ export const UI = () => {
       <p className="pointer-events-none text-xl">
         {currentPlayer.state.profile.name}
       </p>
+      {winner && (
+        <p className="pointer-events-none text-2xl font-bold">
+          {players[winner].state.profile.name} won!
+        </p>
+      )}
     </div>
   );
 };
