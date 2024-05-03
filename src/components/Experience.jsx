@@ -13,8 +13,6 @@ export const Experience = () => {
 
   return (
     <>
-      <OrbitControls />
-
       <Interactive
         onSelect={(event) => {
           event.stopPropagation();
