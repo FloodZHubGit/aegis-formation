@@ -164,7 +164,6 @@ export const GameEngineProvider = ({ children }) => {
         newDeck.splice(randomIndex, 1);
       }
       player.setState("cards", cards, true);
-      console.log("Player", player.id, "cards", cards);
     });
     setDeck(newDeck, true);
 
@@ -177,7 +176,6 @@ export const GameEngineProvider = ({ children }) => {
 
   const startGame = () => {
     if (isHost()) {
-      console.log("Starting game...");
       setPlayerStart(0);
       setPlayerTurn(0);
       setDeck(
@@ -265,7 +263,6 @@ export const GameEngineProvider = ({ children }) => {
         true
       );
       players.forEach((player) => {
-        console.log("Setting up player", player.id);
         player.setState("cards", [], true);
         player.setState("winner", false, true);
       });
