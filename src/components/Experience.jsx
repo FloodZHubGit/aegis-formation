@@ -14,8 +14,7 @@ export const Experience = () => {
   return (
     <>
       <Interactive
-        onSelect={(event) => {
-          event.stopPropagation();
+        onSelect={() => {
           if (playerTurn === myIndex) {
             drawCard(myIndex);
           }
@@ -32,8 +31,7 @@ export const Experience = () => {
           {cards.map((card, index) => (
             <Interactive
               key={index}
-              onSelect={(event) => {
-                event.stopPropagation();
+              onSelect={() => {
                 if (playerTurn === myIndex) {
                   playCard(myIndex, index);
                 }
