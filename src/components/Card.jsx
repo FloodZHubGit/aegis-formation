@@ -85,3 +85,7 @@ useTexture.preload("cards/yellow_reverse.png");
 useTexture.preload("cards/yellow_skip.png");
 useTexture.preload("cards/wild_color_changer.png");
 useTexture.preload("cards/wild_pick_four.png");
+useTexture.preload("cards/blue_color_changer.png");
+useTexture.preload("cards/green_color_changer.png");
+useTexture.preload("cards/red_color_changer.png");
+useTexture.preload("cards/yellow_color_changer.png");
