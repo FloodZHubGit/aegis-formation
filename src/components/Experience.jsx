@@ -23,26 +23,27 @@ export const Experience = () => {
           }
         }}
       >
-        <mesh position={[-3, -3, 0]} scale={0.25}>
+        <mesh position={[0, -3, -2]} scale={0.25}>
           <boxBufferGeometry args={[1, 1, 1]} />
           <meshStandardMaterial color="hotpink" />
         </mesh>
       </Interactive>
 
-      <group rotation={[0, Math.PI, 0]} scale={0.25} position={[-3, 0, 0]}>
+      <group rotation={[0, Math.PI, 0]} scale={0.25} position={[0, 0, -2]}>
         <Center>
           {cards.map((card, index) => (
-            <Interactive>
+            <Interactive
+              key={index}
+              onSelect={(event) => {
+                event.stopPropagation();
+                if (playerTurn === myIndex) {
+                  playCard(myIndex, index);
+                }
+              }}
+            >
               <Card
-                key={index}
                 type={`${card.type}_${card.value}`}
                 position={[(index - cards.length / 2) * 2, 0, 0]}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (playerTurn === myIndex) {
-                    playCard(myIndex, index);
-                  }
-                }}
               />
             </Interactive>
           ))}
@@ -52,7 +53,7 @@ export const Experience = () => {
       {lastPlayedCard && (
         <Card
           type={`${lastPlayedCard.type}_${lastPlayedCard.value}`}
-          position={[-3, 3, 0]}
+          position={[0, 3, -2]}
           rotation={[0, Math.PI, 0]}
           scale={0.25}
         />
