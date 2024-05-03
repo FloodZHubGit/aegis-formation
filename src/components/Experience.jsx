@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Center, Environment, OrbitControls } from "@react-three/drei";
 import { Card } from "./Card";
 import { myPlayer } from "playroomkit";
@@ -11,13 +12,24 @@ export const Experience = () => {
   const myIndex = players.findIndex((player) => player.id === me.id);
   const cards = me.getState("cards") || [];
 
+  const [hasPlayed, setHasPlayed] = useState(false);
+
+  useEffect(() => {
+    if (hasPlayed) {
+      const timer = setTimeout(() => {
+        setHasPlayed(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasPlayed]);
+
   return (
     <>
       <Interactive
-        onSelect={(event) => {
-          event.stopPropagation();
-          if (playerTurn === myIndex) {
+        onSelect={() => {
+          if (playerTurn === myIndex && !hasPlayed) {
             drawCard(myIndex);
+            setHasPlayed(true);
           }
         }}
       >
@@ -32,10 +44,10 @@ export const Experience = () => {
           {cards.map((card, index) => (
             <Interactive
               key={index}
-              onSelect={(event) => {
-                event.stopPropagation();
-                if (playerTurn === myIndex) {
+              onSelect={() => {
+                if (playerTurn === myIndex && !hasPlayed) {
                   playCard(myIndex, index);
+                  setHasPlayed(true);
                 }
               }}
             >
