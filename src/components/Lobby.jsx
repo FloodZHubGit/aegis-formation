@@ -2,7 +2,7 @@ import { myPlayer, isHost } from "playroomkit";
 import { useGameEngine } from "../hooks/useGameEngine";
 import { useState } from "react";
 
-export const Game = () => {
+export const Lobby = () => {
   const me = myPlayer();
   const { players, startGame, phase } = useGameEngine();
 
@@ -36,14 +36,11 @@ export const Game = () => {
   };
 
   return (
-    <div className="flex flex-col items-center bg-gradient-to-b from-purple-400 to-pink-300 min-h-screen p-4">
-      <h1 className="text-5xl font-extrabold text-white text-center mb-6 drop-shadow-lg">
-        Incognito
-      </h1>
-      {isHost() && (
+    <>
+      {isHost() ? (
         <div className="bg-white rounded-lg shadow-md p-5 mb-6 w-full max-w-lg">
           <p className="text-xl font-semibold text-gray-700 mb-4">
-            🎉 Vous êtes l'hôte de la partie!
+            🎉 Tu es l'hôte de la partie !
           </p>
           <p className="text-lg font-medium text-gray-800">
             Joueurs: <span className="text-green-600">{totalPlayers}</span>
@@ -116,7 +113,7 @@ export const Game = () => {
 
           {/* Start Game Button */}
           <button
-            onClick={() => startGame(numIncognito, numMrBlanco)}
+            onClick={startGame(numIncognito, numMrBlanco)}
             className={`w-full py-3 font-semibold text-center text-gray-800 rounded-lg shadow transition-transform ${
               totalPlayers < 3
                 ? "bg-gray-400 cursor-not-allowed"
@@ -131,6 +128,12 @@ export const Game = () => {
               Au moins 3 joueurs sont nécessaires pour commencer la partie.
             </p>
           )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md p-5 mb-6 w-full max-w-lg text-center">
+          <p className="text-xl font-semibold text-gray-700 mb-4">
+            En attente de l'hôte
+          </p>
         </div>
       )}
 
@@ -167,6 +170,6 @@ export const Game = () => {
           </li>
         ))}
       </ul>
-    </div>
+    </>
   );
 };

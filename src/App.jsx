@@ -1,9 +1,9 @@
-import { Game } from "./components/Game";
+import { Incognito } from "./components/Incognito";
 
 function App() {
   return (
     <>
-      <Game />
+      <Incognito />
     </>
   );
 }
