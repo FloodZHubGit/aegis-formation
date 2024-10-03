@@ -1,283 +1,81 @@
-import {
-  getState,
-  isHost,
-  onPlayerJoin,
-  useMultiplayerState,
-  usePlayersList,
-} from "playroomkit";
-import React, { useEffect } from "react";
-import { randInt } from "three/src/math/MathUtils";
+import { isHost, useMultiplayerState, usePlayersList, getState } from "playroomkit"
+import React from "react";
+import { wordList } from "../data/wordList";
 
 const GameEngineContext = React.createContext();
 
-const CARDS_PER_PLAYER = 7;
-
 export const GameEngineProvider = ({ children }) => {
-  const [winnerIndex, setWinnerIndex] = useMultiplayerState(
-    "winnerIndex",
-    null
-  );
+  const [winnersIndex, setWinnersIndex] = useMultiplayerState("winnersIndex", []);
   const [winner, setWinner] = useMultiplayerState("winner", false);
-  const [turnOrder, setTurnOrder] = useMultiplayerState("turnOrder", 1);
-  const [timer, setTimer] = useMultiplayerState("timer", 0);
-  const [playerTurn, setPlayerTurn] = useMultiplayerState("playerTurn", 0);
-  const [playerStart, setPlayerStart] = useMultiplayerState("playerStart", 0);
-  const [deck, setDeck] = useMultiplayerState("deck", []);
-  const [lastPlayedCard, setLastPlayedCard] = useMultiplayerState(
-    "lastPlayedCard",
-    null
-  );
-  const [selectNewColor, setSelectNewColor] = useMultiplayerState(
-    "selectNewColor",
-    false
-  );
+
+  const [phase, setPhase] = useMultiplayerState("phase", "lobby");
+  
 
   const players = usePlayersList(true);
   players.sort((a, b) => a.id.localeCompare(b.id));
 
   const gameState = {
     players,
-    timer,
-    playerTurn,
-    playerStart,
-    deck,
-    lastPlayedCard,
+    winnersIndex,
     winner,
-    winnerIndex,
-    selectNewColor,
+    phase,
   };
 
-  const playCard = (playerIndex, cardIndex) => {
-    if (playerIndex !== playerTurn) {
-      return;
-    }
-    const player = players[playerIndex];
-    const cards = player.getState("cards") || [];
-    const card = cards[cardIndex];
-    if (
-      card.type === "wild" ||
-      card.type === lastPlayedCard.type ||
-      card.value === lastPlayedCard.value
-    ) {
-      setLastPlayedCard(card, true);
-      cards.splice(cardIndex, 1);
-      player.setState("cards", cards, true);
-
-      if (cards.length === 0) {
-        player.setState("winner", true, true);
-        setWinnerIndex(playerIndex, true);
-        setWinner(true, true);
-      }
-
-      if (card.value === "picker") {
-        const nextPlayer = players[(playerTurn + 1) % players.length];
-        const cards = nextPlayer.getState("cards") || [];
-        for (let i = 0; i < 2; i++) {
-          if (deck.length > 0) {
-            const randomIndex = Math.floor(Math.random() * deck.length);
-            const randomCard = deck.splice(randomIndex, 1)[0];
-            cards.push(randomCard);
-          }
-        }
-        nextPlayer.setState("cards", cards, true);
-        setDeck(deck, true);
-      }
-
-      if (card.value === "reverse") {
-        setTurnOrder(-turnOrder, true);
-      }
-
-      if (card.value === "color_changer" || card.value === "pick_four") {
-        setSelectNewColor(true, true);
-        if (card.value === "pick_four") {
-          const nextPlayer = players[(playerTurn + turnOrder) % players.length];
-          const cards = nextPlayer.getState("cards") || [];
-          for (let i = 0; i < 4; i++) {
-            if (deck.length > 0) {
-              const randomIndex = Math.floor(Math.random() * deck.length);
-              const randomCard = deck.splice(randomIndex, 1)[0];
-              cards.push(randomCard);
-            }
-          }
-          nextPlayer.setState("cards", cards, true);
-          setDeck(deck, true);
-          setPlayerTurn((playerTurn + 2 * turnOrder) % players.length, true);
-        }
-      } else {
-        if (card.value === "skip" || card.value === "picker") {
-          if (turnOrder > 0) {
-            setPlayerTurn((playerTurn + 2) % players.length, true);
-          }
-          if (turnOrder < 0) {
-            setPlayerTurn(
-              (playerTurn + players.length - 2) % players.length,
-              true
-            );
-          }
-        } else {
-          if (turnOrder > 0) {
-            setPlayerTurn((playerTurn + 1) % players.length, true);
-          }
-          if (turnOrder < 0) {
-            setPlayerTurn(
-              (playerTurn + players.length - 1) % players.length,
-              true
-            );
-          }
-        }
-      }
-    }
-  };
-
-  const selectColor = (color) => {
-    setSelectNewColor(false, true);
-    const lastCard = getState("lastPlayedCard");
-    lastCard.type = color;
-    lastCard.value = "color_changer";
-    setLastPlayedCard(lastCard, true);
-    if (turnOrder > 0) {
-      setPlayerTurn((playerTurn + 1) % players.length, true);
-    }
-    if (turnOrder < 0) {
-      setPlayerTurn((playerTurn + players.length - 1) % players.length, true);
-    }
-  };
-
-  const drawCard = (playerIndex) => {
-    const newDeck = [...getState("deck")];
-    const player = players[playerIndex];
-    const cards = player.getState("cards") || [];
-    const randomIndex = randInt(0, newDeck.length - 1);
-    cards.push(newDeck[randomIndex]);
-    newDeck.splice(randomIndex, 1);
-    player.setState("cards", cards, true);
-    setDeck(newDeck, true);
-  };
-
-  const distributeCards = (cardsPerPlayer) => {
-    const newDeck = [...getState("deck")];
-    players.forEach((player) => {
-      const cards = player.getState("cards") || [];
-      for (let i = cards.length; i < cardsPerPlayer; i++) {
-        const randomIndex = randInt(0, newDeck.length - 1);
-        cards.push(newDeck[randomIndex]);
-        newDeck.splice(randomIndex, 1);
-      }
-      player.setState("cards", cards, true);
-    });
-    setDeck(newDeck, true);
-
-    const randomIndex = randInt(0, newDeck.length - 1);
-    const randomCard = newDeck[randomIndex];
-    newDeck.splice(randomIndex, 1);
-    setLastPlayedCard(randomCard, true);
-    setDeck(newDeck, true);
-  };
-
-  const startGame = () => {
+  const gameSetup = (incognitoPlayers, mrBlancoPlayers) => {
     if (isHost()) {
-      setPlayerStart(0);
-      setPlayerTurn(0);
-      setDeck(
-        [
-          // numbers
-          ...new Array(1).fill(0).map(() => ({ type: "blue", value: 0 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 1 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 2 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 3 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 4 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 5 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 6 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 7 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 8 })),
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: 9 })),
-          ...new Array(1).fill(0).map(() => ({ type: "red", value: 0 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 1 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 2 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 3 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 4 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 5 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 6 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 7 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 8 })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: 9 })),
-          ...new Array(1).fill(0).map(() => ({ type: "yellow", value: 0 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 1 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 2 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 3 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 4 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 5 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 6 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 7 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 8 })),
-          ...new Array(2).fill(0).map(() => ({ type: "yellow", value: 9 })),
-          ...new Array(1).fill(0).map(() => ({ type: "green", value: 0 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 1 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 2 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 3 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 4 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 5 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 6 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 7 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 8 })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: 9 })),
-          // pickers
-          ...new Array(2)
-            .fill(0)
-            .map(() => ({ type: "blue", value: "picker" })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: "picker" })),
-          ...new Array(2)
-            .fill(0)
-            .map(() => ({ type: "yellow", value: "picker" })),
-          ...new Array(2)
-            .fill(0)
-            .map(() => ({ type: "green", value: "picker" })),
-          // reverses
-          ...new Array(2)
-            .fill(0)
-            .map(() => ({ type: "blue", value: "reverse" })),
-          ...new Array(2)
-            .fill(0)
-            .map(() => ({ type: "red", value: "reverse" })),
-          ...new Array(2)
-            .fill(0)
-            .map(() => ({ type: "yellow", value: "reverse" })),
-          ...new Array(2)
-            .fill(0)
-            .map(() => ({ type: "green", value: "reverse" })),
-          // skips
-          ...new Array(2).fill(0).map(() => ({ type: "blue", value: "skip" })),
-          ...new Array(2).fill(0).map(() => ({ type: "red", value: "skip" })),
-          ...new Array(2)
-            .fill(0)
-            .map(() => ({ type: "yellow", value: "skip" })),
-          ...new Array(2).fill(0).map(() => ({ type: "green", value: "skip" })),
-          // wilds
-          ...new Array(4)
-            .fill(0)
-            .map(() => ({ type: "wild", value: "pick_four" })),
-          ...new Array(4)
-            .fill(0)
-            .map(() => ({ type: "wild", value: "color_changer" })),
-        ],
-        true
-      );
-      players.forEach((player) => {
-        player.setState("cards", [], true);
-        player.setState("winner", false, true);
-      });
-      distributeCards(CARDS_PER_PLAYER);
-    }
-  };
+      if (players.length > 2) {
+        setPhase("game");
+        // assign roles to the players, if a player is not mr blanco or incognito, they are a civilian
+        let roles = [];
+        for (let i = 0; i < incognitoPlayers; i++) {
+          roles.push("incognito");
+        }
+        for (let i = 0; i < mrBlancoPlayers; i++) {
+          roles.push("mr blanco");
+        }
+        for (let i = 0; i < players.length - incognitoPlayers - mrBlancoPlayers; i++) {
+          roles.push("civilian");
+        }
+        // shuffle the roles array
+        roles.sort(() => Math.random() - 0.5);
+        // assign the roles to the players
+        players.forEach((player, index) => {
+          player.setState("role", roles[index], true);
+        });
+        // print all players and their roles
+        players.forEach((player) => {
+          console.log(player.state.profile.name, player.getState("role"));
+        });
+        // get a random word and similar word from the wordList (src/data/wordList.js)
+        const randomIndex = Math.floor(Math.random() * wordList.length);
+        const word = wordList[randomIndex].word;
+        const similar = wordList[randomIndex].similar;
+        // assign the word to the player, if civilian, assign the word, if incognito, assign the similar word, if mr blanco, dont assign a word
+        players.forEach((player) => {
+          if (player.getState("role") === "civilian") {
+            player.setState("word", word, true);
+          } else if (player.getState("role") === "incognito") {
+            player.setState("word", similar, true);
+          } else {
+            player.setState("word", "", true);
+          }
+        });
 
-  useEffect(() => {
-    startGame();
-    onPlayerJoin(startGame);
-  }, []);
+        // console log all player words
+        players.forEach((player) => {
+          console.log(player.state.profile.name, player.getState("word"));
+        });
+      }
+    } 
+  }
+
+  const startGame = (incognitoPlayers, mrBlancoPlayers) => () => {
+    gameSetup(incognitoPlayers, mrBlancoPlayers);
+  };
 
   return (
     <GameEngineContext.Provider
-      value={{ ...gameState, drawCard, playCard, selectColor }}
+      value={{ ...gameState, startGame }}
     >
       {children}
     </GameEngineContext.Provider>
