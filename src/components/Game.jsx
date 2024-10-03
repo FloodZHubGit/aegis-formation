@@ -85,11 +85,19 @@ export const Game = () => {
                         </button>
                     </div>
                     <button 
-                        onClick={startGame(numIncognito, numMrBlanco)}
-                        className="mt-3 bg-yellow-500 text-gray-800 font-semibold py-3 px-6 rounded-full shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
+                        onClick={() => startGame(numIncognito, numMrBlanco)}
+                        className={`mt-3 font-semibold py-3 px-6 rounded-full shadow-lg transition-transform ${
+                            totalPlayers < 3 
+                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                                : 'bg-yellow-500 text-gray-800 hover:scale-105 hover:shadow-xl'
+                        }`}
+                        disabled={totalPlayers < 3} // Disable button if fewer than 3 players
                     >
                         🎮 Commencer la partie
                     </button>
+                    {totalPlayers < 3 && (
+                        <p className="text-red-500 mt-2">Au moins 3 joueurs sont nécessaires pour commencer la partie.</p>
+                    )}
                 </div>
             )}
             <h3 className="text-4xl font-bold text-white text-center mb-4 drop-shadow-lg">Joueurs:</h3>
