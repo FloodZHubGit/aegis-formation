@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@types/three": "0.152.1",
-    "playroomkit": "^0.0.68",
+    "playroomkit": "^0.0.82",
     "r3f-vite-starter": "file:",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

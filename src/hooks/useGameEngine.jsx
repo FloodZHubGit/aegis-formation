@@ -10,12 +10,13 @@ const GameEngineContext = React.createContext();
 
 export const GameEngineProvider = ({ children }) => {
   const [phase, setPhase] = useMultiplayerState("phase", "lobby");
+  const [wordList, setWordList] = useMultiplayerState("wordList", []);
   const players = usePlayersList(true);
   players.sort((a, b) => a.id.localeCompare(b.id));
 
-  const gameSetup = (incognitoPlayers, mrBlancoPlayers) => {
+  const gameSetup = () => {
     if (isHost()) {
-      players.forEach((player, index) => {
+      players.forEach((player) => {
         player.setState("word", "", true);
       });
 
@@ -25,6 +26,8 @@ export const GameEngineProvider = ({ children }) => {
 
   const gameState = {
     players,
+    wordList,
+    setWordList,
     phase,
   };
 
@@ -32,6 +35,7 @@ export const GameEngineProvider = ({ children }) => {
     <GameEngineContext.Provider
       value={{
         ...gameState,
+        gameSetup,
       }}
     >
       {children}
