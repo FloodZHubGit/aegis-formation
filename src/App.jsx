@@ -4,7 +4,7 @@ import {
   myPlayer,
   useMultiplayerState,
 } from "playroomkit";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGameEngine } from "./hooks/useGameEngine";
 
 function WaitingScreen() {
@@ -15,39 +15,56 @@ function WaitingScreen() {
   );
 }
 
-// Helper function to render a mind map (basic grid for simplicity)
+// Helper function to render a mind map with rotation and scaling based on frequency
 function MindMap({ words }) {
   return (
-    <div className="flex flex-wrap justify-center">
-      {words.map((word, index) => (
-        <div
-          key={index}
-          className="bg-blue-200 text-blue-900 p-2 m-2 rounded shadow-lg"
-        >
-          {word}
-        </div>
-      ))}
+    <div className="flex flex-wrap justify-center items-center">
+      {Object.entries(words).map(([word, count], index) => {
+        const size = 1 + count * 0.3; // Scale word size based on frequency
+        const rotation = (index % 4) * 15 - 30; // Rotate words for visual interest
+        return (
+          <div
+            key={index}
+            style={{
+              transform: `rotate(${rotation}deg) scale(${size})`,
+            }}
+            className="bg-blue-200 text-blue-900 p-2 m-2 rounded shadow-lg"
+          >
+            {word}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 function App() {
-  const [chatMessages, setChatMessages] = useMultiplayerState(
-    "chatMessages",
-    []
-  );
-  const [words, setWords] = useMultiplayerState("words", []); // New multiplayer state for words
+  const [words, setWords] = useMultiplayerState("words", {});
   const [newWord, setNewWord] = useState("");
+  const [wordSubmitted, setWordSubmitted] = useState(false);
   const me = myPlayer();
   const { players } = useGameEngine();
   const [gameStarted, setGameStarted] = useState(false);
 
-  console.log(me);
+  useEffect(() => {
+    // Reset state when game starts
+    if (gameStarted) {
+      setWordSubmitted(false);
+      setNewWord("");
+    }
+  }, [gameStarted]);
 
   const handleAddWord = () => {
-    if (newWord.trim()) {
-      setWords([...words, newWord.trim()]);
-      setNewWord("");
+    if (newWord.trim() && !wordSubmitted) {
+      const word = newWord.trim().toLowerCase();
+      setWords((prevWords) => {
+        // Increment the count of the word or add it if it doesn't exist
+        return {
+          ...prevWords,
+          [word]: (prevWords[word] || 0) + 1,
+        };
+      });
+      setWordSubmitted(true);
     }
   };
 
@@ -55,38 +72,11 @@ function App() {
     setGameStarted(true);
   };
 
-  const handleDeleteWords = () => {
-    setWords([]); // Clear the mind map
-  };
-
   if (isStreamScreen()) {
     return (
       <div className="p-4">
         <h1 className="text-3xl font-bold mb-4">Mind Map - Social Networks</h1>
         <MindMap words={words} /> {/* Render the mind map */}
-        {gameStarted && (
-          <div className="flex space-x-2 mb-4 mt-4">
-            <input
-              type="text"
-              value={newWord}
-              onChange={(e) => setNewWord(e.target.value)}
-              className="border p-2 flex-grow"
-              placeholder="Enter a word about Social Networks"
-            />
-            <button
-              onClick={handleAddWord}
-              className="bg-green-500 text-white p-2 rounded"
-            >
-              Add Word
-            </button>
-          </div>
-        )}
-        <button
-          onClick={handleDeleteWords}
-          className="bg-red-500 text-white p-2 rounded mt-4"
-        >
-          Clear Mind Map
-        </button>
       </div>
     );
   } else {
@@ -112,20 +102,28 @@ function App() {
           <h1 className="text-3xl font-bold mb-4">
             {isHost() ? "Host Screen" : "Player Screen"}
           </h1>
-          <div className="flex space-x-2">
-            <input
-              type="text"
-              value={newWord}
-              onChange={(e) => setNewWord(e.target.value)}
-              className="border p-2 flex-grow"
-              placeholder="Enter a word about Social Networks"
-            />
-            <button
-              onClick={handleAddWord}
-              className="bg-blue-500 text-white p-2 rounded"
-            >
-              Add Word
-            </button>
+          <div className="mb-4">
+            {wordSubmitted ? (
+              <p className="text-green-600">Thank you for your contribution!</p>
+            ) : (
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newWord}
+                  onChange={(e) => setNewWord(e.target.value)}
+                  className="border p-2 flex-grow"
+                  placeholder="Enter a word about Social Networks"
+                  disabled={wordSubmitted}
+                />
+                <button
+                  onClick={handleAddWord}
+                  className="bg-blue-500 text-white p-2 rounded"
+                  disabled={wordSubmitted}
+                >
+                  Submit Word
+                </button>
+              </div>
+            )}
           </div>
         </div>
       );
