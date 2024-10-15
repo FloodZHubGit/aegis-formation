@@ -3,7 +3,6 @@ import {
   isStreamScreen,
   myPlayer,
   useMultiplayerState,
-  usePlayers,
 } from "playroomkit";
 import { useState } from "react";
 import { useGameEngine } from "./hooks/useGameEngine";
@@ -39,24 +38,9 @@ function App() {
   };
 
   if (isStreamScreen()) {
-    if (!gameStarted) {
-      return <WaitingScreen />;
-    }
     return (
       <div>
-        <h1>{isHost() ? "Host Stream Screen" : "Guest Stream Screen"}</h1>
-        <ul>
-          {chatMessages.map((message, index) => (
-            <li key={index}>{message}</li>
-          ))}
-        </ul>
-        <button onClick={handleDeleteMessages}>Delete Messages</button>
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-        />
-        <button onClick={handleSendMessage}>Send</button>
+        <h1>Stream Screen</h1>
       </div>
     );
   } else {
@@ -64,35 +48,17 @@ function App() {
       if (isHost()) {
         return (
           <div>
-            <h1>Host Waiting Screen</h1>
-            <ul>
-              {players.map((player) => (
-                <li key={player.id}>{player.state.profile.name}</li>
-              ))}
-            </ul>
-            <button onClick={handleStartGame}>Start Game</button>
+            <h1>Host Screen</h1>
           </div>
         );
       } else {
-        return <WaitingScreen />;
+        return (
+          <div>
+            <h1>Player screen</h1>
+          </div>
+        );
       }
     }
-    return (
-      <div>
-        <h1>Game Screen</h1>
-        <ul>
-          {chatMessages.map((message, index) => (
-            <li key={index}>{message}</li>
-          ))}
-        </ul>
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-        />
-        <button onClick={handleSendMessage}>Send</button>
-      </div>
-    );
   }
 }
 
