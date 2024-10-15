@@ -15,64 +15,77 @@ function WaitingScreen() {
   );
 }
 
+// Helper function to render a mind map (basic grid for simplicity)
+function MindMap({ words }) {
+  return (
+    <div className="flex flex-wrap justify-center">
+      {words.map((word, index) => (
+        <div
+          key={index}
+          className="bg-blue-200 text-blue-900 p-2 m-2 rounded shadow-lg"
+        >
+          {word}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function App() {
   const [chatMessages, setChatMessages] = useMultiplayerState(
     "chatMessages",
     []
   );
-  const [newMessage, setNewMessage] = useState("");
+  const [words, setWords] = useMultiplayerState("words", []); // New multiplayer state for words
+  const [newWord, setNewWord] = useState("");
   const me = myPlayer();
   const { players } = useGameEngine();
   const [gameStarted, setGameStarted] = useState(false);
 
   console.log(me);
 
-  const handleSendMessage = () => {
-    const messageWithName = `${me.state.profile.name}: ${newMessage}`;
-    setChatMessages([...chatMessages, messageWithName]);
-    setNewMessage("");
-  };
-
-  const handleDeleteMessages = () => {
-    setChatMessages([]);
+  const handleAddWord = () => {
+    if (newWord.trim()) {
+      setWords([...words, newWord.trim()]);
+      setNewWord("");
+    }
   };
 
   const handleStartGame = () => {
     setGameStarted(true);
   };
 
+  const handleDeleteWords = () => {
+    setWords([]); // Clear the mind map
+  };
+
   if (isStreamScreen()) {
     return (
       <div className="p-4">
-        <h1 className="text-3xl font-bold mb-4">Stream Screen</h1>
-        <ul className="mb-4">
-          {chatMessages.map((message, index) => (
-            <li key={index} className="border-b py-2">
-              {message}
-            </li>
-          ))}
-        </ul>
+        <h1 className="text-3xl font-bold mb-4">Mind Map - Social Networks</h1>
+        <MindMap words={words} /> {/* Render the mind map */}
         {gameStarted && (
-          <div className="flex space-x-2 mb-4">
+          <div className="flex space-x-2 mb-4 mt-4">
             <input
               type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              value={newWord}
+              onChange={(e) => setNewWord(e.target.value)}
               className="border p-2 flex-grow"
+              placeholder="Enter a word about Social Networks"
             />
             <button
-              onClick={handleSendMessage}
-              className="bg-blue-500 text-white p-2 rounded"
+              onClick={handleAddWord}
+              className="bg-green-500 text-white p-2 rounded"
             >
-              Send
+              Add Word
             </button>
           </div>
         )}
         <button
-          onClick={handleDeleteMessages}
-          className="bg-red-500 text-white p-2 rounded"
+          onClick={handleDeleteWords}
+          className="bg-red-500 text-white p-2 rounded mt-4"
         >
-          Delete Messages
+          Clear Mind Map
         </button>
       </div>
     );
@@ -99,25 +112,19 @@ function App() {
           <h1 className="text-3xl font-bold mb-4">
             {isHost() ? "Host Screen" : "Player Screen"}
           </h1>
-          <ul className="mb-4">
-            {chatMessages.map((message, index) => (
-              <li key={index} className="border-b py-2">
-                {message}
-              </li>
-            ))}
-          </ul>
           <div className="flex space-x-2">
             <input
               type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              value={newWord}
+              onChange={(e) => setNewWord(e.target.value)}
               className="border p-2 flex-grow"
+              placeholder="Enter a word about Social Networks"
             />
             <button
-              onClick={handleSendMessage}
+              onClick={handleAddWord}
               className="bg-blue-500 text-white p-2 rounded"
             >
-              Send
+              Add Word
             </button>
           </div>
         </div>
