@@ -51,6 +51,12 @@ function App() {
           ))}
         </ul>
         <button onClick={handleDeleteMessages}>Delete Messages</button>
+        <input
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+        />
+        <button onClick={handleSendMessage}>Send</button>
       </div>
     );
   } else {
@@ -74,6 +80,11 @@ function App() {
     return (
       <div>
         <h1>Game Screen</h1>
+        <ul>
+          {chatMessages.map((message, index) => (
+            <li key={index}>{message}</li>
+          ))}
+        </ul>
         <input
           type="text"
           value={newMessage}
