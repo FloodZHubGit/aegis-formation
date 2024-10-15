@@ -21,6 +21,10 @@ function App() {
     setNewMessage("");
   };
 
+  const handleDeleteMessages = () => {
+    setChatMessages([]);
+  };
+
   if (isStreamScreen()) {
     return (
       <div>
@@ -30,6 +34,7 @@ function App() {
             <li key={index}>{message}</li>
           ))}
         </ul>
+        <button onClick={handleDeleteMessages}>Delete Messages</button>
       </div>
     );
   } else {
