@@ -6,6 +6,7 @@ import {
   usePlayers,
 } from "playroomkit";
 import { useState } from "react";
+import { useGameEngine } from "./hooks/useGameEngine";
 
 function WaitingScreen() {
   return <h1>Waiting for the host to start the game...</h1>;
@@ -18,7 +19,7 @@ function App() {
   );
   const [newMessage, setNewMessage] = useState("");
   const me = myPlayer();
-  const players = usePlayers();
+  const { players } = useGameEngine();
   const [gameStarted, setGameStarted] = useState(false);
 
   console.log(me);
