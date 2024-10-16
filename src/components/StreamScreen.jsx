@@ -1,12 +1,9 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { useGameEngine } from "../hooks/useGameEngine";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { Sparkles, Brain, Award, Volume2, VolumeX } from "lucide-react";
 
-// Custom hook for text-to-speech
 const useSpeech = () => {
   const [speaking, setSpeaking] = useState(false);
   const [supported, setSupported] = useState(true);
@@ -21,8 +18,8 @@ const useSpeech = () => {
     if (!supported) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "fr-FR"; // Set language to French
-    utterance.rate = 0.9; // Slightly slower rate for clarity
+    utterance.lang = "fr-FR";
+    utterance.rate = 0.9;
 
     setSpeaking(true);
     utterance.onend = () => setSpeaking(false);
@@ -50,6 +47,8 @@ export const StreamScreen = () => {
   } = useGameEngine();
   const [showConfetti, setShowConfetti] = useState(false);
   const { speak, stop, speaking, supported } = useSpeech();
+  const [lastSpokenWord, setLastSpokenWord] = useState("");
+  const [quizIntroSpoken, setQuizIntroSpoken] = useState(false);
 
   useEffect(() => {
     if (phase === "quiz" && showAnswer) {
@@ -70,8 +69,9 @@ export const StreamScreen = () => {
       speak("Bienvenue sur la formation de Aegis !");
     } else if (phase === "mindmap") {
       speak("Défi de carte mentale");
-    } else if (phase === "quiz") {
+    } else if (phase === "quiz" && !quizIntroSpoken) {
       speak("C'est l'heure du quiz !");
+      setQuizIntroSpoken(true);
     }
 
     // Speak questions and answers
@@ -80,13 +80,24 @@ export const StreamScreen = () => {
         speak(questions[currentQuestionIndex].question);
       } else {
         speak(
-          `Bonne réponse: ${questions[currentQuestionIndex].answer}. ${questions[currentQuestionIndex].explanation}`
+          `La bonne réponse est ${questions[currentQuestionIndex].answer}. ${questions[currentQuestionIndex].explanation}`
         );
       }
     }
 
     return () => stop();
-  }, [phase, currentQuestionIndex, showAnswer, questions]);
+  }, [phase, currentQuestionIndex, showAnswer, questions, quizIntroSpoken]);
+
+  useEffect(() => {
+    // Speak new words added to the mindmap
+    if (phase === "mindmap" && wordList.length > 0) {
+      const latestWord = wordList[wordList.length - 1];
+      if (latestWord !== lastSpokenWord) {
+        speak(latestWord);
+        setLastSpokenWord(latestWord);
+      }
+    }
+  }, [phase, wordList, lastSpokenWord]);
 
   const toggleSpeech = () => {
     if (speaking) {
@@ -98,9 +109,11 @@ export const StreamScreen = () => {
           speak(questions[currentQuestionIndex].question);
         } else {
           speak(
-            `Bonne réponse: ${questions[currentQuestionIndex].answer}. ${questions[currentQuestionIndex].explanation}`
+            `La bonne réponse est ${questions[currentQuestionIndex].answer}. ${questions[currentQuestionIndex].explanation}`
           );
         }
+      } else if (phase === "mindmap" && wordList.length > 0) {
+        speak(wordList[wordList.length - 1]);
       }
     }
   };

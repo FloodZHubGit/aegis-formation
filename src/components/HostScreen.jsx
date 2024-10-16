@@ -46,7 +46,7 @@ export const HostScreen = () => {
                 <Brain className="ml-2 w-5 h-5" />
               </motion.button>
             )}
-            <PlayerList players={players} me={me} showWord={true} />
+            <PlayerList players={players} me={me} showWord={false} />
           </motion.div>
         )}
 
