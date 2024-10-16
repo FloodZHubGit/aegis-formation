@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useGameEngine } from "../hooks/useGameEngine";
 import { myPlayer } from "playroomkit";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Send, Award, Brain } from "lucide-react";
+import { Loader2, Send, Award, Brain, Flag } from "lucide-react";
 
 export const ViewerScreen = () => {
   const {
@@ -17,10 +17,19 @@ export const ViewerScreen = () => {
   const me = myPlayer();
   const [word, setWord] = useState(me.state.word || "");
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [newComment, setNewComment] = useState("");
+  const videoRef = useRef(null);
+  const commentsRef = useRef(null);
 
   useEffect(() => {
     setSelectedAnswer(null);
   }, [currentQuestionIndex]);
+
+  useEffect(() => {
+    if (commentsRef.current) {
+      commentsRef.current.scrollTop = commentsRef.current.scrollHeight;
+    }
+  }, [comments]);
 
   const handleWordChange = (e) => {
     setWord(e.target.value);
@@ -39,6 +48,18 @@ export const ViewerScreen = () => {
   const handleAnswerClick = (answer) => {
     setSelectedAnswer(answer);
     selectAnswer(me.id, answer);
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (newComment.trim()) {
+      addComment(me.id, newComment.trim());
+      setNewComment("");
+    }
+  };
+
+  const handleReportComment = (commentId) => {
+    reportComment(commentId, me.id);
   };
 
   return (

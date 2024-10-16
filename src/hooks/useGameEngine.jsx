@@ -147,7 +147,6 @@ export const GameEngineProvider = ({ children }) => {
     "currentQuestionIndex",
     0
   );
-
   const [showAnswer, setShowAnswer] = useMultiplayerState("showAnswer", false);
 
   const players = usePlayersList(true);
@@ -159,6 +158,7 @@ export const GameEngineProvider = ({ children }) => {
         player.setState("word", "", true);
         player.setState("score", 0, true);
         player.setState("selectedAnswer", null, true);
+        player.setState("reportedComments", 0, true);
       });
 
       setPhase("mindmap");
@@ -172,21 +172,16 @@ export const GameEngineProvider = ({ children }) => {
   };
 
   const nextQuestion = () => {
-    console.log("Next question");
     if (isHost()) {
       setShowAnswer(false);
 
       const currentIndex = currentQuestionIndex + 1;
       if (currentIndex < questions.length) {
         setCurrentQuestionIndex(currentIndex);
-      } else {
-        setPhase("mindmap");
       }
 
       players.forEach((player) => {
-        console.log(player.state.selectedAnswer);
         player.setState("selectedAnswer", null, true);
-        console.log(player.state.selectedAnswer);
       });
     }
   };

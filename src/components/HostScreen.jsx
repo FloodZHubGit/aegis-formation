@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useGameEngine } from "../hooks/useGameEngine";
 import { isHost, myPlayer } from "playroomkit";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Brain, Award, ChevronRight, Eye } from "lucide-react";
+import { Play, Brain, Award, ChevronRight, Eye, Video } from "lucide-react";
 
 export const HostScreen = () => {
   const {
@@ -118,7 +118,13 @@ export const HostScreen = () => {
   );
 };
 
-const PlayerList = ({ players, me, showWord = false, showScore = false }) => (
+const PlayerList = ({
+  players,
+  me,
+  showWord = false,
+  showScore = false,
+  showReportedComments = false,
+}) => (
   <ul className="space-y-4 max-w-2xl mx-auto">
     {players.map(
       (player) =>
@@ -143,9 +149,9 @@ const PlayerList = ({ players, me, showWord = false, showScore = false }) => (
                 Word: {player.state.word || "None"}
               </span>
             )}
-            {showScore && (
-              <span className="text-sm ml-4 bg-green-500 px-2 py-1 rounded-full">
-                Score: {player.state.score || 0}
+            {showReportedComments && (
+              <span className="text-sm ml-4 bg-yellow-500 px-2 py-1 rounded-full">
+                Reported: {player.state.reportedComments || 0}
               </span>
             )}
           </motion.li>

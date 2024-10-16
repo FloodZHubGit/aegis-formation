@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useGameEngine } from "../hooks/useGameEngine";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Sparkles, Brain, Award, Volume2, VolumeX } from "lucide-react";
+import { Sparkles, Brain, Award, Volume2, VolumeX, Flag } from "lucide-react";
 
 const useSpeech = () => {
   const [speaking, setSpeaking] = useState(false);
@@ -49,6 +49,9 @@ export const StreamScreen = () => {
   const { speak, stop, speaking, supported } = useSpeech();
   const [lastSpokenWord, setLastSpokenWord] = useState("");
   const [quizIntroSpoken, setQuizIntroSpoken] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const videoRef = useRef(null);
+  const commentsRef = useRef(null);
 
   useEffect(() => {
     if (phase === "quiz" && showAnswer) {
@@ -64,7 +67,6 @@ export const StreamScreen = () => {
   }, [phase, showAnswer]);
 
   useEffect(() => {
-    // Speak phase titles
     if (phase === "lobby") {
       speak("Bienvenue sur la formation de Aegis !");
     } else if (phase === "mindmap") {
@@ -74,7 +76,6 @@ export const StreamScreen = () => {
       setQuizIntroSpoken(true);
     }
 
-    // Speak questions and answers
     if (phase === "quiz") {
       if (!showAnswer) {
         speak(questions[currentQuestionIndex].question);
@@ -89,7 +90,6 @@ export const StreamScreen = () => {
   }, [phase, currentQuestionIndex, showAnswer, questions, quizIntroSpoken]);
 
   useEffect(() => {
-    // Speak new words added to the mindmap
     if (phase === "mindmap" && wordList.length > 0) {
       const latestWord = wordList[wordList.length - 1];
       if (latestWord !== lastSpokenWord) {
@@ -99,11 +99,16 @@ export const StreamScreen = () => {
     }
   }, [phase, wordList, lastSpokenWord]);
 
+  useEffect(() => {
+    if (commentsRef.current) {
+      commentsRef.current.scrollTop = commentsRef.current.scrollHeight;
+    }
+  }, [comments]);
+
   const toggleSpeech = () => {
     if (speaking) {
       stop();
     } else {
-      // Repeat the last spoken text
       if (phase === "quiz") {
         if (!showAnswer) {
           speak(questions[currentQuestionIndex].question);
@@ -116,6 +121,18 @@ export const StreamScreen = () => {
         speak(wordList[wordList.length - 1]);
       }
     }
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (newComment.trim()) {
+      addComment("viewer", newComment.trim());
+      setNewComment("");
+    }
+  };
+
+  const handleReportComment = (commentId) => {
+    reportComment(commentId, "viewer");
   };
 
   return (
