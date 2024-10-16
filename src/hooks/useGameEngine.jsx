@@ -158,7 +158,6 @@ export const GameEngineProvider = ({ children }) => {
         player.setState("word", "", true);
         player.setState("score", 0, true);
         player.setState("selectedAnswer", null, true);
-        player.setState("reportedComments", 0, true);
       });
 
       setPhase("mindmap");

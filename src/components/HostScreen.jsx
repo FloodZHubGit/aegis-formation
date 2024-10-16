@@ -118,13 +118,7 @@ export const HostScreen = () => {
   );
 };
 
-const PlayerList = ({
-  players,
-  me,
-  showWord = false,
-  showScore = false,
-  showReportedComments = false,
-}) => (
+const PlayerList = ({ players, me, showWord = false, showScore = false }) => (
   <ul className="space-y-4 max-w-2xl mx-auto">
     {players.map(
       (player) =>
@@ -147,11 +141,6 @@ const PlayerList = ({
             {showWord && (
               <span className="text-sm ml-4 bg-blue-500 px-2 py-1 rounded-full">
                 Word: {player.state.word || "None"}
-              </span>
-            )}
-            {showReportedComments && (
-              <span className="text-sm ml-4 bg-yellow-500 px-2 py-1 rounded-full">
-                Reported: {player.state.reportedComments || 0}
               </span>
             )}
           </motion.li>

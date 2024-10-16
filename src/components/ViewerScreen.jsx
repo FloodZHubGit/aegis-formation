@@ -18,18 +18,10 @@ export const ViewerScreen = () => {
   const [word, setWord] = useState(me.state.word || "");
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [newComment, setNewComment] = useState("");
-  const videoRef = useRef(null);
-  const commentsRef = useRef(null);
 
   useEffect(() => {
     setSelectedAnswer(null);
   }, [currentQuestionIndex]);
-
-  useEffect(() => {
-    if (commentsRef.current) {
-      commentsRef.current.scrollTop = commentsRef.current.scrollHeight;
-    }
-  }, [comments]);
 
   const handleWordChange = (e) => {
     setWord(e.target.value);
@@ -48,14 +40,6 @@ export const ViewerScreen = () => {
   const handleAnswerClick = (answer) => {
     setSelectedAnswer(answer);
     selectAnswer(me.id, answer);
-  };
-
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (newComment.trim()) {
-      addComment(me.id, newComment.trim());
-      setNewComment("");
-    }
   };
 
   const handleReportComment = (commentId) => {

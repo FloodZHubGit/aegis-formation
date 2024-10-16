@@ -49,9 +49,6 @@ export const StreamScreen = () => {
   const { speak, stop, speaking, supported } = useSpeech();
   const [lastSpokenWord, setLastSpokenWord] = useState("");
   const [quizIntroSpoken, setQuizIntroSpoken] = useState(false);
-  const [newComment, setNewComment] = useState("");
-  const videoRef = useRef(null);
-  const commentsRef = useRef(null);
 
   useEffect(() => {
     if (phase === "quiz" && showAnswer) {
@@ -99,12 +96,6 @@ export const StreamScreen = () => {
     }
   }, [phase, wordList, lastSpokenWord]);
 
-  useEffect(() => {
-    if (commentsRef.current) {
-      commentsRef.current.scrollTop = commentsRef.current.scrollHeight;
-    }
-  }, [comments]);
-
   const toggleSpeech = () => {
     if (speaking) {
       stop();
@@ -120,14 +111,6 @@ export const StreamScreen = () => {
       } else if (phase === "mindmap" && wordList.length > 0) {
         speak(wordList[wordList.length - 1]);
       }
-    }
-  };
-
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (newComment.trim()) {
-      addComment("viewer", newComment.trim());
-      setNewComment("");
     }
   };
 
