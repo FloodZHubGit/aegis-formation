@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@types/three": "0.152.1",
+    "canvas-confetti": "^1.9.3",
+    "framer-motion": "^11.11.9",
+    "lucide-react": "^0.453.0",
     "playroomkit": "^0.0.82",
     "r3f-vite-starter": "file:",
     "react": "^18.2.0",
