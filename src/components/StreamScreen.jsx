@@ -173,7 +173,7 @@ export const StreamScreen = () => {
             className="space-y-8"
           >
             <h1 className="text-4xl font-extrabold text-center mb-8">
-              Défi de carte mentale
+              Brainstorming
               <Brain className="inline-block ml-2 text-blue-300" />
             </h1>
             <ul className="space-y-4 max-w-2xl mx-auto">

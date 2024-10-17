@@ -38,8 +38,10 @@ export const ViewerScreen = () => {
   };
 
   const handleAnswerClick = (answer) => {
-    setSelectedAnswer(answer);
-    selectAnswer(me.id, answer);
+    if (!showAnswer) {
+      setSelectedAnswer(answer);
+      selectAnswer(me.id, answer);
+    }
   };
 
   const handleReportComment = (commentId) => {
@@ -71,7 +73,7 @@ export const ViewerScreen = () => {
             className="flex flex-col items-center space-y-6"
           >
             <h1 className="text-4xl font-extrabold text-center mb-8">
-              Mindmap Challenge
+              Brainstorming
               <Brain className="inline-block ml-2 text-blue-300" />
             </h1>
             <div className="bg-white bg-opacity-20 backdrop-blur-lg rounded-xl shadow-lg p-6 w-full max-w-md">
@@ -88,7 +90,7 @@ export const ViewerScreen = () => {
                   type="text"
                   value={word}
                   onChange={handleWordChange}
-                  placeholder="Enter your word"
+                  placeholder="Entrez un mot..."
                   className="w-full px-4 py-2 rounded-lg bg-white bg-opacity-50 backdrop-blur-sm text-black placeholder-gray-500 mb-4"
                   disabled={!!me.state.word}
                 />
@@ -99,7 +101,7 @@ export const ViewerScreen = () => {
                   className="px-6 py-3 bg-green-500 text-white rounded-lg font-semibold flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!!me.state.word}
                 >
-                  Set Word
+                  Envoyer
                   <Send className="ml-2 w-4 h-4" />
                 </motion.button>
               </div>
@@ -129,6 +131,9 @@ export const ViewerScreen = () => {
                 {questions[currentQuestionIndex].options.map(
                   (option, index) => {
                     let buttonStyle = "bg-blue-500 hover:bg-blue-600";
+                    if (selectedAnswer === option) {
+                      buttonStyle = "bg-yellow-500 hover:bg-yellow-600";
+                    }
                     if (showAnswer) {
                       if (option === questions[currentQuestionIndex].answer) {
                         buttonStyle = "bg-green-500";
@@ -145,7 +150,7 @@ export const ViewerScreen = () => {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => handleAnswerClick(option)}
-                        disabled={selectedAnswer !== null || showAnswer}
+                        disabled={showAnswer}
                         className={`p-4 rounded-lg text-white font-semibold text-lg transition-colors ${buttonStyle}`}
                       >
                         {option}

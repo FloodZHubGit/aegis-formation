@@ -33,7 +33,7 @@ export const HostScreen = () => {
             className="space-y-8"
           >
             <h1 className="text-4xl font-extrabold text-center mb-8">
-              Game Lobby
+              Salle d'attente
             </h1>
             {isHost() && (
               <motion.button
@@ -42,7 +42,7 @@ export const HostScreen = () => {
                 className="w-full max-w-md mx-auto flex items-center justify-center px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
                 onClick={handleSetupGame}
               >
-                Start Brainstorming
+                Commencer le brainstorming
                 <Brain className="ml-2 w-5 h-5" />
               </motion.button>
             )}
@@ -58,7 +58,7 @@ export const HostScreen = () => {
             className="space-y-8"
           >
             <h1 className="text-4xl font-extrabold text-center mb-8">
-              Mindmap Challenge
+              Brainstorming
               <Brain className="inline-block ml-2 text-blue-300" />
             </h1>
             {isHost() && (
@@ -68,7 +68,7 @@ export const HostScreen = () => {
                 className="w-full max-w-md mx-auto flex items-center justify-center px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
                 onClick={startQuiz}
               >
-                Start Quiz
+                Débuter le quiz
                 <Play className="ml-2 w-5 h-5" />
               </motion.button>
             )}
@@ -96,12 +96,12 @@ export const HostScreen = () => {
               >
                 {showAnswer ? (
                   <>
-                    Next Question
+                    Question suivante
                     <ChevronRight className="ml-2 w-5 h-5" />
                   </>
                 ) : (
                   <>
-                    Show Answer
+                    Afficher la réponse
                     <Eye className="ml-2 w-5 h-5" />
                   </>
                 )}
@@ -109,7 +109,7 @@ export const HostScreen = () => {
             </div>
             <PlayerList players={players} me={me} showScore={true} />
             <div className="text-center text-xl font-semibold">
-              Question {currentQuestionIndex + 1} of {questions.length}
+              Question {currentQuestionIndex + 1} sur {questions.length}
             </div>
           </motion.div>
         )}
@@ -140,7 +140,12 @@ const PlayerList = ({ players, me, showWord = false, showScore = false }) => (
             </span>
             {showWord && (
               <span className="text-sm ml-4 bg-blue-500 px-2 py-1 rounded-full">
-                Word: {player.state.word || "None"}
+                Mot: {player.state.word || "Aucun"}
+              </span>
+            )}
+            {showScore && (
+              <span className="text-sm ml-4 bg-yellow-500 px-2 py-1 rounded-full">
+                Score: {player.state.score || 0}
               </span>
             )}
           </motion.li>
